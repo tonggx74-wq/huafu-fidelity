@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "HuaFu-Fidelity 华服保真: An Explainable Recognizer for Cultural Distortion of Chinese Costume in Generative-AI Content for International Communication (Prototype)"
+abstract: >-
+  An open-source, value-sensitive-design prototype with an explainable interface
+  for recognizing cultural distortion of Chinese costume (Hanfu, Qipao, ethnic
+  dress) in generative-AI content for international communication. Recognition is
+  driven by a transparent expert rule base (not a trained model); the prototype
+  demonstrates risk warning, bilingual provenance explanation, comparison display,
+  and a three-stage human-AI review workflow.
+type: software
+authors:
+  - given-names: "<Your given name 名>"
+    family-names: "<Your family name 姓>"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"   # 可选 optional
+    affiliation: "<Your institution 单位>"
+keywords:
+  - value sensitive design
+  - cultural fidelity
+  - Chinese costume
+  - Hanfu
+  - generative AI
+  - explainable interface
+  - international communication
+license: MIT
+version: "0.1.0"
+date-released: "2026-06-20"
+url: "https://github.com/<your-username>/huafu-fidelity"

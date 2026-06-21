@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>华服保真 · 中华服饰文化失真识别系统（雏形）/ HuaFu-Fidelity</title>
+<meta name="description" content="A prototype, explainable interface for recognizing cultural distortion of Chinese costume (Hanfu, Qipao, ethnic dress) in generative-AI content for international communication." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    /* palette grounded in Chinese textile-dye / costume colours */
+    --silk:#F1EEE6;        /* 绢/素 raw-silk paper */
+    --silk-2:#FBFAF5;      /* lighter card */
+    --ink:#1F262B;         /* 黛 ink text */
+    --ink-soft:#5B626A;
+    --line:#D9D3C5;        /* hairline on paper */
+    --indigo:#27415C;      /* 靛蓝 primary */
+    --indigo-deep:#192E44;
+    --cinnabar:#B23A2D;    /* 朱砂 severe */
+    --gold:#A47C2B;        /* 缃/赭金 moderate */
+    --jade:#37745A;        /* 青碧 fidelity / ok */
+    --jade-soft:#E5EFE8;
+    --cinnabar-soft:#F6E5E2;
+    --gold-soft:#F2EAD6;
+    --shadow:0 1px 0 #fff inset, 0 1px 2px rgba(25,46,68,.06);
+    --radius:3px;
+    --serif:"Noto Serif SC","Songti SC",STSong,"SimSun",serif;
+    --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--silk);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px 64px}
+  a{color:var(--indigo)}
+
+  /* ---------- header ---------- */
+  header.site{border-bottom:1px solid var(--line);padding:30px 0 22px;margin-bottom:26px}
+  .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--cinnabar);font-weight:700}
+  h1.title{font-family:var(--serif);font-weight:900;font-size:31px;line-height:1.2;margin:9px 0 4px;letter-spacing:.01em}
+  h1.title .en{display:block;font-family:var(--serif);font-weight:500;font-size:15px;letter-spacing:.04em;color:var(--ink-soft);margin-top:5px}
+  .lede{color:var(--ink-soft);max-width:760px;margin:8px 0 0;font-size:14px}
+  .pipeline{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;font-size:12px}
+  .pipeline span{background:var(--silk-2);border:1px solid var(--line);border-radius:100px;padding:3px 11px;color:var(--ink-soft)}
+  .pipeline span b{color:var(--indigo);font-weight:700}
+  .pipeline .arr{border:0;background:none;color:var(--line);padding:3px 0}
+
+  /* ---------- layout ---------- */
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:26px;align-items:start}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--silk-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .panel.input{position:sticky;top:18px}
+  @media(max-width:880px){.panel.input{position:static}}
+  .panel h2{font-family:var(--serif);font-size:15px;font-weight:700;margin:0;padding:14px 16px;border-bottom:1px solid var(--line);letter-spacing:.02em}
+  .panel h2 .num{color:var(--cinnabar);font-weight:900;margin-right:8px}
+  .pad{padding:15px 16px}
+
+  /* ---------- form ---------- */
+  label.f{display:block;margin:0 0 12px}
+  label.f .lab{font-size:12.5px;font-weight:700;color:var(--indigo-deep);display:block;margin-bottom:4px}
+  label.f .lab em{font-style:normal;color:var(--ink-soft);font-weight:400}
+  select,button,input{font-family:var(--sans);font-size:14px}
+  select{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;color:var(--ink)}
+  select:focus,button:focus-visible{outline:2px solid var(--indigo);outline-offset:1px}
+  .row-btn{display:flex;gap:8px;margin-top:6px}
+  button.primary{flex:1;background:var(--indigo);color:#fff;border:1px solid var(--indigo-deep);border-radius:var(--radius);padding:9px 12px;font-weight:700;cursor:pointer;letter-spacing:.04em}
+  button.primary:hover{background:var(--indigo-deep)}
+  button.ghost{background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:var(--radius);padding:9px 12px;cursor:pointer}
+  button.ghost:hover{border-color:var(--ink-soft)}
+  .preset{margin:0 0 14px}
+  .preset .lab{font-size:12.5px;font-weight:700;color:var(--indigo-deep);margin-bottom:6px}
+  .preset-list{display:flex;flex-direction:column;gap:6px}
+  .preset-list button{text-align:left;background:#fff;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:var(--radius);padding:7px 10px;cursor:pointer;font-size:13px;line-height:1.4}
+  .preset-list button:hover{border-left-color:var(--cinnabar);background:#fffdf8}
+  .preset-list button small{display:block;color:var(--ink-soft);font-size:11.5px}
+
+  /* ---------- results ---------- */
+  .empty{padding:48px 24px;text-align:center;color:var(--ink-soft)}
+  .empty .mark{font-family:var(--serif);font-size:40px;color:var(--line);line-height:1}
+  /* score meter */
+  .score-wrap{display:flex;gap:16px;align-items:center;padding:16px}
+  .gauge{--v:100;position:relative;width:96px;height:96px;border-radius:50%;flex:0 0 auto;
+    background:conic-gradient(var(--gc) calc(var(--v)*1%), #ECE7DA 0);}
+  .gauge::after{content:"";position:absolute;inset:11px;background:var(--silk-2);border-radius:50%}
+  .gauge b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:var(--serif);font-weight:900;font-size:25px;z-index:1}
+  .gauge b small{font-weight:500;font-size:10px;color:var(--ink-soft);letter-spacing:.1em}
+  .score-meta .verdict{font-family:var(--serif);font-weight:700;font-size:17px}
+  .score-meta p{margin:3px 0 0;font-size:12.5px;color:var(--ink-soft)}
+  .score-meta .formula{margin-top:6px;font-size:11.5px;color:var(--ink-soft);font-family:var(--serif)}
+
+  /* finding cards */
+  .sect{border-top:1px solid var(--line)}
+  .sect > h3{font-family:var(--serif);font-size:13.5px;font-weight:700;margin:0;padding:11px 16px 4px;display:flex;align-items:center;gap:8px}
+  .sect > h3 .en{font-weight:400;color:var(--ink-soft);font-size:11.5px;letter-spacing:.03em}
+  .sect .pad{padding-top:6px}
+  .finding{border:1px solid var(--line);border-left-width:4px;border-radius:var(--radius);padding:10px 12px;margin:9px 0;background:#fff}
+  .finding.sev-严重{border-left-color:var(--cinnabar)}
+  .finding.sev-中度{border-left-color:var(--gold)}
+  .finding.sev-轻微{border-left-color:var(--ink-soft)}
+  .finding .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.02em}
+  .tag.type{background:var(--indigo);color:#fff}
+  .tag.sev{border:1px solid currentColor}
+  .sev-严重 .tag.sev{color:var(--cinnabar);background:var(--cinnabar-soft)}
+  .sev-中度 .tag.sev{color:var(--gold);background:var(--gold-soft)}
+  .sev-轻微 .tag.sev{color:var(--ink-soft);background:#eee}
+  .tag.strength{margin-left:auto;background:#fff;border:1px dashed var(--ink-soft);color:var(--ink-soft)}
+  .finding .desc{margin:7px 0 0;font-size:13.5px}
+  .finding .desc .en{display:block;color:var(--ink-soft);font-size:12.5px;margin-top:2px}
+  .finding .basis{margin-top:6px;font-size:11.5px;color:var(--ink-soft);border-top:1px dotted var(--line);padding-top:5px}
+  .finding .basis b{color:var(--indigo-deep)}
+
+  /* provenance cards */
+  .prov{border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;margin:9px 0;background:#fff}
+  .prov h4{margin:0 0 4px;font-family:var(--serif);font-size:14px;font-weight:700}
+  .prov h4 .en{font-weight:400;color:var(--ink-soft);font-size:12px}
+  .prov .zh{font-size:13px}
+  .prov .en-body{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
+  .prov .ref{font-size:11px;color:var(--ink-soft);margin-top:5px}
+  .prov .ref b{color:var(--indigo-deep)}
+  .mm{font-size:11px;color:var(--ink-soft);font-style:italic;margin-top:4px}
+
+  /* comparison table */
+  table.cmp{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:4px}
+  table.cmp th,table.cmp td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  table.cmp thead th{background:var(--indigo);color:#fff;font-weight:700}
+  table.cmp thead th.hua{background:var(--jade)}
+  table.cmp tbody th{background:var(--gold-soft);font-weight:700;color:var(--indigo-deep);white-space:nowrap}
+  table.cmp td.hua{background:var(--jade-soft)}
+  table.cmp .axis{color:var(--ink-soft)}
+
+  /* review */
+  .stage{display:flex;gap:8px;margin:2px 0 12px;font-size:11.5px}
+  .stage div{flex:1;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:7px 9px;text-align:center}
+  .stage div b{display:block;color:var(--indigo);font-family:var(--serif)}
+  .stage div.on{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo)}
+  .rev{border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;margin:8px 0;background:#fff}
+  .rev .h{font-size:13px;font-weight:700}
+  .rev .acts{display:flex;gap:6px;margin:7px 0 4px;flex-wrap:wrap}
+  .rev .acts button{font-size:12px;padding:4px 10px;border-radius:100px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .rev .acts button.sel[data-act="confirm"]{background:var(--jade);color:#fff;border-color:var(--jade)}
+  .rev .acts button.sel[data-act="reject"]{background:var(--cinnabar);color:#fff;border-color:var(--cinnabar)}
+  .rev textarea{width:100%;border:1px solid var(--line);border-radius:var(--radius);padding:6px 8px;font-family:var(--sans);font-size:12.5px;resize:vertical;min-height:38px}
+  .rev .state{font-size:11px;color:var(--ink-soft);margin-top:4px}
+
+  .exports{display:flex;gap:8px;flex-wrap:wrap;padding:14px 16px;border-top:1px solid var(--line)}
+  .exports button{font-size:13px}
+  .log{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--ink-soft);background:#fff;border:1px solid var(--line);border-radius:var(--radius);max-height:130px;overflow:auto;padding:8px 10px;margin:0 16px 16px;white-space:pre-wrap}
+
+  footer.site{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;font-size:12px;color:var(--ink-soft)}
+  footer.site b{color:var(--ink)}
+  .note{background:var(--gold-soft);border:1px solid #E4D4A8;border-radius:var(--radius);padding:10px 13px;font-size:12.5px;margin:18px 0 26px;color:#6b551f}
+  .note b{color:#5a4517}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="site">
+    <div class="eyebrow">研究雏形 · Research Prototype · Open Source</div>
+    <h1 class="title">华服保真：中华服饰视觉形象文化失真识别系统
+      <span class="en">HuaFu-Fidelity — An Explainable Recognizer for Cultural Distortion of Chinese Costume in Generative-AI Content for International Communication</span>
+    </h1>
+    <p class="lede">面向国际传播，以价值敏感设计为框架，将文化保真作为可被识别与干预的核心价值。本雏形以专家整理的规则知识库（非训练模型）演示识别机制、可解释界面与人机协同复核流程。<br/>
+    A value-sensitive-design prototype that treats <em>cultural fidelity</em> as a designable value; it demonstrates the recognition workflow and explainable interface using a transparent, expert-curated rule base (not a trained model).</p>
+    <div class="pipeline" aria-label="设计流程 design pipeline">
+      <span><b>1</b> 情境分析 Context</span><span class="arr">→</span>
+      <span><b>2</b> 价值识别 Values</span><span class="arr">→</span>
+      <span><b>3</b> 技术转译 Translation</span><span class="arr">→</span>
+      <span><b>4</b> 原型开发 Prototype</span>
+      <span class="arr">·</span><span>原则 Principles: 透明 / 可解释 / 可审计</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- ============ INPUT ============ -->
+    <section class="panel input" aria-label="输入">
+      <h2><span class="num">一</span>情境与特征输入 <span style="font-weight:400;color:var(--ink-soft);font-size:11px">Input</span></h2>
+      <div class="pad">
+        <div class="preset">
+          <div class="lab">预设案例 Preset cases</div>
+          <div class="preset-list" id="presets"></div>
+        </div>
+        <form id="form">
+          <label class="f"><span class="lab">目标朝代/类型 <em>Target type</em></span>
+            <select id="type"></select></label>
+          <label class="f"><span class="lab">领襟 <em>Collar / lapel</em></span>
+            <select id="collar"></select></label>
+          <label class="f"><span class="lab">形制 / 廓形 <em>Form / silhouette</em></span>
+            <select id="shape"></select></label>
+          <label class="f"><span class="lab">腰系 <em>Waist / sash</em></span>
+            <select id="waist"></select></label>
+          <label class="f"><span class="lab">纹样 <em>Motif</em></span>
+            <select id="motif"></select></label>
+          <label class="f"><span class="lab">工艺 <em>Craft</em></span>
+            <select id="craft"></select></label>
+          <label class="f"><span class="lab">场合 <em>Context / occasion</em></span>
+            <select id="context"></select></label>
+          <label class="f"><span class="lab">内容标注出处 <em>Labeled origin</em></span>
+            <select id="origin"></select></label>
+          <div class="row-btn">
+            <button type="submit" class="primary">运行识别 Run</button>
+            <button type="button" class="ghost" id="reset">清空</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ RESULTS ============ -->
+    <section class="panel" aria-label="识别结果" id="results">
+      <h2><span class="num">二</span>识别结果与可解释界面 <span style="font-weight:400;color:var(--ink-soft);font-size:11px">Results &amp; Explanation</span></h2>
+      <div id="resultBody">
+        <div class="empty">
+          <div class="mark">衣</div>
+          <p>选择左侧预设案例，或自定义特征后点击「运行识别」。<br/>Pick a preset or set features, then Run.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="note">
+    <b>关于本雏形 / About this prototype.</b> 这是一个<strong>开源研究雏形</strong>，用于体现"文化失真识别系统＋可解释界面"的设计与人机协同流程。识别由<strong>透明、可审计的专家规则库</strong>驱动（见源码 <code>KB</code> 对象），<strong>并非</strong>训练好的深度模型；完整系统中"算法初筛"将由机器学习承担，本雏形以规则库保证可复现与可解释。规则与释义依据沈从文《中国古代服饰研究》、周锡保《中国历代服饰史》、黄能馥等《中华历代服饰艺术》及《论语》《新唐书·车服志》等通行文献整理，仅供研究演示，欢迎指正与扩充。
+  </div>
+
+  <footer class="site">
+    <p><b>华服保真 HuaFu-Fidelity</b> · 面向国际传播的中华服饰文化失真识别系统（雏形）· MIT License ·
+    引用方式见仓库 <code>CITATION.cff</code>，可通过 Zenodo 获取 DOI。</p>
+    <p>本项目为课题《文明互鉴视域下中华服饰视觉形象的文化失真识别与设计干预研究》的前期研究基础与开源原型。</p>
+  </footer>
+</div>
+
+<script>
+/* =====================================================================
+   华服保真 HuaFu-Fidelity — open knowledge base + recognition logic
+   ---------------------------------------------------------------------
+   Value-Sensitive-Design mapping (透明可审计):
+     价值 Value      : 文化保真 (cultural fidelity)
+     规范 Norms      : 形制合朝代规制 / 纹样语义正确 / 工艺如实 / 礼制得体 / 文明不混并
+     设计指标 Indicators : the rules below (5 distortion types × 3 severities)
+   This is a RULE BASE for demonstration, not a trained model.
+   ===================================================================== */
+
+/* ---- option vocabularies (feature space) ---- */
+const OPT = {
+  type:[
+    ["tang","唐制汉服 Tang Hanfu"],["song","宋制汉服 Song Hanfu"],["ming","明制汉服 Ming Hanfu"],
+    ["qizhuang","清代旗装 Qing banner robe"],["qipao","近代旗袍 Modern Qipao"],
+    ["ethnic","少数民族服饰 Ethnic-minority dress"],["vague","未指定·笼统东方风 Generic ‘Oriental’"]
+  ],
+  collar:[
+    ["youren","交领右衽 Cross-collar, right lapel"],["zuoren","交领左衽 Cross-collar, LEFT lapel"],
+    ["round","圆领 Round collar"],["stand","立领 Stand collar"],["duijin","对襟 Centre-opening"],
+    ["kimono","重叠衽·宽腰封（和服式） Kimono-style overlap + obi"],
+    ["hanbok","短衣高腰（韩服式赤古里） Hanbok-style short jacket"]
+  ],
+  shape:[
+    ["ruqun","上衣下裳·襦裙 Ru-qun"],["shenyi","深衣制 Shenyi"],["paofu","袍服·直裾 Straight robe"],
+    ["mamian","马面裙 Mamian (horse-face) skirt"],["yipao","旗装·一体袍 One-piece banner robe"],
+    ["chima","高腰蓬裙（韩服式） Hanbok-style high-waist skirt"],["mixed","混搭·无形制依据 Mixed, no basis"]
+  ],
+  waist:[
+    ["xidai","系带 Cloth ties"],["gedai","革带·銙 Leather belt with plaques"],
+    ["obi","宽腰封·太鼓结（obi） Wide obi + taiko knot"],
+    ["gaoyao","高腰系带（韩服式） Hanbok high-waist tie"],["none","无 None"]
+  ],
+  motif:[
+    ["chinese","缠枝/团窠/海水江崖 Chinese motifs"],["lizhi","十二章·五爪龙 Twelve-symbols / 5-claw dragon"],
+    ["sakura","樱花·家纹（日本） Sakura / kamon (Japanese)"],["taiji","太极八卦（滥用） Taiji-bagua (misused)"],
+    ["ai","数码生成·无依据 AI-generated, no basis"],["plain","素/无显著纹样 Plain"]
+  ],
+  craft:[
+    ["zhuanghua","妆花/缂丝/织金 Zhuanghua / kesi / brocade"],["embroider","刺绣 Embroidery"],
+    ["print","数码印花仿织（误读） Digital print faking weave"],["na","未标注 Unspecified"]
+  ],
+  context:[
+    ["changfu","常服·便服 Everyday wear"],["lifu","礼服·婚服 Ceremonial / wedding"],
+    ["chaofu","朝服·官服 Court / official"],["media","影视·游戏角色 Film / game character"],["na","未指定 Unspecified"]
+  ],
+  origin:[
+    ["cn","中国/中华 China"],["jp","日本 Japan"],["kr","韩国 Korea"],
+    ["asia","笼统“亚洲/东方” Generic ‘Asian/Oriental’"],["na","未标注 Unspecified"]
+  ]
+};
+const HUA_TYPES=["tang","song","ming","qizhuang","qipao","ethnic"]; // 中华 types
+
+/* ---- rule base : each rule -> a finding ---- */
+const KB = {
+  rules:[
+    {id:"R1",type:"形制错置",en:"Form misplacement",sev:"严重",strength:"强提示",
+     when:f=>f.collar==="zuoren",
+     zh:"交领呈左衽。汉服生者着装规约为右衽（左襟覆右），左衽多见于殓服或史载用以喻指异俗，此处属严重形制错置。",
+     en:"Left-lapel cross-collar. Living-wear Hanfu convention is right-lapel; left-lapel belongs to burial dress or, in the classics, signals non-Han custom — a serious form error.",
+     ref:"《论语·宪问》“被发左衽”；沈从文《中国古代服饰研究》"},
+    {id:"R2a",type:"形制错置",en:"Form misplacement",sev:"中度",strength:"中提示",
+     when:f=>f.type==="tang"&&f.shape==="mamian",
+     zh:"朝代与形制不符：马面裙定型并盛行于明代，标注为唐制却出现马面裙，属时代错置。",
+     en:"Period mismatch: the mamian skirt was standardised in the Ming; pairing it with a ‘Tang’ label is anachronistic.",
+     ref:"周锡保《中国历代服饰史》"},
+    {id:"R2b",type:"形制错置",en:"Form misplacement",sev:"中度",strength:"中提示",
+     when:f=>(f.type==="tang"||f.type==="song")&&f.collar==="stand",
+     zh:"朝代与领型不符：立领约于明代中后期方流行，唐宋服饰一般不用立领。",
+     en:"Period mismatch: the stand collar became common only in the mid-late Ming; Tang/Song dress generally avoids it.",
+     ref:"黄能馥《中华历代服饰艺术》"},
+    {id:"R3",type:"纹样混淆",en:"Motif confusion",sev:"中度",strength:"中提示",
+     when:f=>f.motif==="sakura",
+     zh:"纹样混淆：樱花、家纹为典型日本元素，施于中华服饰会造成文化来源误读。",
+     en:"Motif confusion: sakura and kamon are hallmark Japanese elements; placing them on Chinese costume misattributes cultural origin.",
+     ref:"通行纹样学整理"},
+    {id:"R4",type:"纹样混淆",en:"Motif confusion",sev:"轻微",strength:"弱提示",
+     when:f=>f.motif==="taiji",
+     zh:"纹样使用存疑：太极八卦多属道教法服或符箓语境，作通用装饰滥用易致语义偏差。",
+     en:"Questionable motif: taiji-bagua belongs to Daoist ritual contexts; using it as generic décor risks semantic drift.",
+     ref:"通行纹样学整理"},
+    {id:"R5",type:"工艺误读",en:"Craft misreading",sev:"轻微",strength:"弱提示",
+     when:f=>f.craft==="print",
+     zh:"工艺误读：以数码印花模拟妆花、缂丝、织金的立体织造质感，属对传统工艺的表层化误读。妆花为挖梭妆彩、缂丝为通经断纬。",
+     en:"Craft misreading: digital print mimicking the relief of zhuanghua/kesi/brocade flattens traditional weaving. Zhuanghua uses inlaid wefts; kesi uses ‘continuous warp, broken weft’.",
+     ref:"沈从文《中国古代服饰研究》"},
+    {id:"R6a",type:"礼制偏移",en:"Ritual deviation",sev:"严重",strength:"强提示",
+     when:f=>f.motif==="lizhi"&&(f.context==="changfu"||f.context==="media"),
+     zh:"礼制僭越：十二章纹、五爪龙为帝王与高阶礼制专属，用于常服或一般角色属严重礼制偏移（服章之制）。",
+     en:"Ritual transgression: the twelve symbols and five-claw dragon are reserved for the emperor/high rites; using them on everyday or generic figures seriously violates sartorial rank.",
+     ref:"《新唐书·车服志》；《明史·舆服志》"},
+    {id:"R6b",type:"礼制偏移",en:"Ritual deviation",sev:"中度",strength:"中提示",
+     when:f=>f.motif==="lizhi"&&(f.context==="na"||f.context==="lifu"||f.context==="chaofu"),
+     zh:"礼制需复核：十二章/五爪龙属高阶礼制纹样，须核对穿着者身份与场合是否相称。",
+     en:"Ritual check needed: twelve-symbols / five-claw dragon are high-rank motifs; verify the wearer’s status and occasion.",
+     ref:"《明史·舆服志》"},
+    {id:"R7",type:"跨文明归并",en:"Cross-civilization conflation",sev:"严重",strength:"强提示",
+     when:f=>f.collar==="kimono"||f.waist==="obi",
+     zh:"跨文明归并（和服）：重叠衽配宽腰封与太鼓结是和服的核心特征，施于中华服饰会与日本服饰混同，是国际传播中的高发严重失真。",
+     en:"Conflation with kimono: overlapping lapels with a wide obi and taiko knot are core kimono features; on Chinese costume they cause confusion with Japanese dress — a frequent, serious error in international communication.",
+     ref:"服饰比较研究整理"},
+    {id:"R8",type:"跨文明归并",en:"Cross-civilization conflation",sev:"中度",strength:"中提示",
+     when:f=>f.collar==="hanbok"||f.shape==="chima"||f.waist==="gaoyao",
+     zh:"跨文明归并（韩服）：高腰短上衣（赤古里）配高腰蓬裙是韩服的典型比例，易与中华服饰混同。",
+     en:"Conflation with hanbok: the short high-waist jacket (jeogori) with a high-waist full skirt is a hallmark hanbok proportion, easily conflated with Chinese costume.",
+     ref:"服饰比较研究整理"},
+    {id:"R9",type:"跨文明归并",en:"Cross-civilization conflation",sev:"中度",strength:"中提示",
+     when:f=>f.type==="vague"||f.shape==="mixed"||f.motif==="ai",
+     zh:"跨文明归并（泛化）：缺乏朝代与形制依据、以笼统“东方风”混搭呈现，会使中华服饰被扁平化为模糊的东方意象。",
+     en:"Generic conflation: lacking period/form basis and rendered as a vague ‘Oriental’ mash-up, Chinese costume is flattened into an ambiguous Eastern image.",
+     ref:"东方主义批评整理"},
+    {id:"R10a",type:"跨文明归并",en:"Regional substitution",sev:"严重",strength:"强提示",
+     when:f=>HUA_TYPES.includes(f.type)&&(f.origin==="jp"||f.origin==="kr"),
+     zh:"地域替代：将中华形制的服饰标注为日本/韩国出品，属严重的来源错误归属。",
+     en:"Regional substitution: labelling a Chinese-form garment as Japanese/Korean in origin is a serious misattribution of source.",
+     ref:"文化主体性研究整理"},
+    {id:"R10b",type:"跨文明归并",en:"Regional substitution",sev:"轻微",strength:"弱提示",
+     when:f=>f.origin==="asia",
+     zh:"来源笼统：以“亚洲/东方”泛称替代具体的中华标识，削弱辨识度，建议明确标注。",
+     en:"Vague sourcing: a generic ‘Asian/Oriental’ label replaces a specific Chinese marker, weakening recognisability; explicit labelling is advised.",
+     ref:"国家形象研究整理"}
+  ],
+
+  /* provenance / cultural-semantic explanations (bilingual) keyed by concept */
+  conventions:{
+    youren:{zh:"交领右衽：左襟覆右、衣领相交呈 y 形，是汉服的核心形制规约，象征中原礼俗。",
+            en:"Right-lapel cross-collar: the left panel laps over the right, forming a ‘y’; a defining Hanfu convention signifying Central-Plains ritual custom.",
+            ref:"沈从文《中国古代服饰研究》"},
+    lizhi:{zh:"服章之制：纹样与色彩标示身份等级，十二章纹、五爪龙、明黄等为帝王专属，僭用即逾礼。",
+           en:"Sartorial rank: motif and colour encode status; the twelve symbols, five-claw dragon and imperial yellow are reserved for the emperor — using them breaches ritual.",
+           ref:"《新唐书·车服志》；《明史·舆服志》"},
+    mamian:{zh:"马面裙：前后有平整裙门（马面），两侧打褶，定型于明代，是明制女装的代表。",
+            en:"Mamian skirt: flat front/back panels (the ‘horse-face’) with pleated sides; standardised in the Ming and emblematic of Ming women’s dress.",
+            ref:"周锡保《中国历代服饰史》"},
+    zhuanghua:{zh:"妆花/缂丝：妆花以挖梭于织造中局部妆彩，缂丝以“通经断纬”成画，皆为不可由印花替代的织造工艺。",
+               en:"Zhuanghua / kesi: zhuanghua inlays coloured wefts during weaving; kesi builds images by ‘continuous warp, broken weft’ — weaving crafts a print cannot replace.",
+               ref:"沈从文《中国古代服饰研究》"},
+    kimono:{zh:"和服特征：左襟覆右但配宽幅腰带（obi）与太鼓结，廓形与系束方式与汉服显著不同。",
+            en:"Kimono markers: right-over-left lap but with a wide obi sash and taiko knot; silhouette and tying differ markedly from Hanfu.",
+            ref:"服饰比较研究"},
+    hanbok:{zh:"韩服特征：短上衣（赤古里）系长飘带，配高腰蓬裙（chima），强调高腰短衣的比例。",
+            en:"Hanbok markers: a short jacket (jeogori) with long ties over a high-waist full skirt (chima), emphasising the high-waist proportion.",
+            ref:"服饰比较研究"}
+  },
+
+  /* comparison matrix : 中华 vs 和服 vs 韩服 on key differentiating axes */
+  comparison:[
+    ["领襟 Collar","右衽交领，领缘平直","右衽交领但更宽大，重叠包覆","直领斜襟，配前系飘带（고름）"],
+    ["腰系 Waist","系带或革带銙，束于自然腰线","宽腰封 obi，束于腰腹并打太鼓结","高腰系带，裙线高至胸下"],
+    ["廓形 Silhouette","上衣下裳或通裁袍服，线条修直","直筒包裹、由腰带定型","短上衣＋高腰蓬裙，上短下蓬"],
+    ["纹样 Motif","缠枝、团窠、海水江崖、十二章","樱花、家纹、几何重复纹","花卉刺绣、留白，色块对比"],
+    ["穿法 Wearing","右衽、平整、以带束","右衽、以 obi 层叠固定","右衽、以飘带系结，强调高腰"]
+  ]
+};
+
+/* ---- presets (instant demos) ---- */
+const PRESETS=[
+  {n:"明制汉服 · 规范",d:"交领右衽 + 马面裙 + 系带 + 缠枝纹 + 妆花",
+   f:{type:"ming",collar:"youren",shape:"mamian",waist:"xidai",motif:"chinese",craft:"zhuanghua",context:"changfu",origin:"cn"}},
+  {n:"汉服误配和服腰封",d:"重叠衽 + 宽腰封 obi + 太鼓结 → 跨文明归并",
+   f:{type:"ming",collar:"kimono",shape:"paofu",waist:"obi",motif:"chinese",craft:"embroider",context:"media",origin:"asia"}},
+  {n:"左衽 + 樱花纹",d:"交领左衽 + 樱花家纹 → 形制错置 + 纹样混淆",
+   f:{type:"tang",collar:"zuoren",shape:"ruqun",waist:"xidai",motif:"sakura",craft:"print",context:"media",origin:"cn"}},
+  {n:"庶民着十二章纹",d:"常服场合 + 十二章/五爪龙 → 礼制僭越",
+   f:{type:"ming",collar:"youren",shape:"paofu",waist:"gedai",motif:"lizhi",craft:"embroider",context:"changfu",origin:"cn"}},
+  {n:"唐制襦裙被标为韩国出品",d:"高腰襦裙 + 标注韩国 → 地域替代/韩服归并",
+   f:{type:"tang",collar:"youren",shape:"chima",waist:"gaoyao",motif:"chinese",craft:"embroider",context:"media",origin:"kr"}},
+  {n:"笼统“东方风”混搭",d:"无朝代依据 + 立领盘扣混搭 + 数码印花",
+   f:{type:"vague",collar:"stand",shape:"mixed",waist:"none",motif:"ai",craft:"print",context:"media",origin:"asia"}}
+];
+
+/* =====================  app  ===================== */
+const $=s=>document.querySelector(s);
+const SEV_PENALTY={"严重":30,"中度":15,"轻微":7};
+const log=[]; let lastFindings=[], lastFeat=null, review={};
+
+function fillSelect(id){const el=$("#"+id);OPT[id].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;el.appendChild(o);});}
+["type","collar","shape","waist","motif","craft","context","origin"].forEach(fillSelect);
+
+function renderPresets(){
+  const box=$("#presets");
+  PRESETS.forEach((p,i)=>{const b=document.createElement("button");
+    b.innerHTML=`${p.n}<small>${p.d}</small>`;
+    b.onclick=()=>{for(const k in p.f)$("#"+k).value=p.f[k];addLog(`载入预设：${p.n}`);run();};
+    box.appendChild(b);});
+}
+renderPresets();
+
+function readFeat(){const f={};["type","collar","shape","waist","motif","craft","context","origin"].forEach(k=>f[k]=$("#"+k).value);return f;}
+function label(group,val){const hit=OPT[group].find(o=>o[0]===val);return hit?hit[1]:val;}
+
+function recognize(f){
+  const found=KB.rules.filter(r=>r.when(f)).map(r=>({...r}));
+  let score=100; found.forEach(x=>score-=SEV_PENALTY[x.sev]); score=Math.max(0,score);
+  return {found,score};
+}
+
+function gaugeColor(s){return s>=80?"var(--jade)":s>=55?"var(--gold)":"var(--cinnabar)";}
+function verdict(s){return s>=80?["保真良好","High fidelity"]:s>=55?["存在偏差，需复核","Some deviation"]:["失真显著，建议校正","Significant distortion"];}
+
+function run(){
+  const f=readFeat(); lastFeat=f;
+  const {found,score}=recognize(f); lastFindings=found; review={};
+  addLog(`运行识别：${label("type",f.type)} → ${found.length} 项发现，保真度 ${score}`);
+  renderResults(f,found,score);
+}
+
+function relevantConventions(f,found){
+  const keys=new Set();
+  if(HUA_TYPES.includes(f.type)) keys.add("youren");
+  found.forEach(x=>{
+    if(x.id==="R6a"||x.id==="R6b") keys.add("lizhi");
+    if(x.id==="R5") keys.add("zhuanghua");
+    if(x.id==="R7") {keys.add("kimono");}
+    if(x.id==="R8") {keys.add("hanbok");}
+    if(x.id==="R2a") keys.add("mamian");
+  });
+  if(f.shape==="mamian") keys.add("mamian");
+  return [...keys].map(k=>({k,...KB.conventions[k]})).filter(x=>x.zh);
+}
+
+function renderResults(f,found,score){
+  const gc=gaugeColor(score), [vz,ve]=verdict(score);
+  const findingsHTML = found.length? found.map(x=>`
+    <div class="finding sev-${x.sev}">
+      <div class="top">
+        <span class="tag type">${x.type}</span>
+        <span class="tag sev">${x.sev}</span>
+        <span class="tag strength">${x.strength}</span>
+      </div>
+      <p class="desc">${x.zh}<span class="en">${x.en}</span></p>
+      <div class="basis"><b>依据 Basis</b> · 规则 ${x.id}｜${x.ref}</div>
+    </div>`).join("")
+    : `<div class="finding sev-轻微" style="border-left-color:var(--jade)"><p class="desc">未触发失真规则：所选特征符合所示中华服饰规约。<span class="en">No distortion rule triggered: the chosen features conform to the Chinese-costume conventions shown.</span></p></div>`;
+
+  const convs=relevantConventions(f,found);
+  const provHTML=convs.map(c=>`
+    <div class="prov"><h4>${c.k==="youren"?"交领右衽":c.k==="lizhi"?"服章之制":c.k==="mamian"?"马面裙":c.k==="zhuanghua"?"妆花 / 缂丝":c.k==="kimono"?"和服特征（区辨）":"韩服特征（区辨）"} <span class="en">Provenance</span></h4>
+      <div class="zh">${c.zh}</div><div class="en-body">${c.en}</div>
+      <div class="ref"><b>依据</b> ${c.ref}</div></div>`).join("")
+    + `<p class="mm">多模态扩展：完整系统支持图文与视听（纹样图例、形制示意、双语语音）以面向缺乏对等物的海外受众。 Multimodal extension (image + audio-visual) is planned for overseas audiences lacking equivalents.</p>`;
+
+  const cmpHTML=`<table class="cmp"><thead><tr><th>区辨轴 Axis</th><th class="hua">中华服饰 Chinese</th><th>和服 Kimono</th><th>韩服 Hanbok</th></tr></thead><tbody>
+    ${KB.comparison.map(r=>`<tr><th>${r[0]}</th><td class="hua">${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}
+    </tbody></table>`;
+
+  $("#resultBody").innerHTML=`
+    <div class="score-wrap">
+      <div class="gauge" style="--v:${score};--gc:${gc}"><b>${score}<small>保真度 / 100</small></b></div>
+      <div class="score-meta">
+        <div class="verdict" style="color:${gc}">${vz} · <span style="font-weight:400;font-size:13px;color:var(--ink-soft)">${ve}</span></div>
+        <p>对象 Target：${label("type",f.type)}　|　发现 Findings：${found.length}</p>
+        <p class="formula">保真度 = 100 − Σ(严重30 / 中度15 / 轻微7)，下限 0（透明计分）</p>
+      </div>
+    </div>
+
+    <div class="sect"><h3>① 风险提示 <span class="en">Risk warning</span></h3><div class="pad">${findingsHTML}</div></div>
+    <div class="sect"><h3>② 出处解释（双语·多模态） <span class="en">Provenance &amp; explanation</span></h3><div class="pad">${provHTML}</div></div>
+    <div class="sect"><h3>③ 对比显示：中华 vs 和服 vs 韩服 <span class="en">Comparison</span></h3><div class="pad">${cmpHTML}</div></div>
+    <div class="sect"><h3>④ 人机协同复核 <span class="en">Human-AI review</span></h3><div class="pad" id="reviewBox"></div></div>
+    <div class="exports">
+      <button class="primary" id="expAnno">导出双语判定标注 (JSON)</button>
+      <button class="ghost" id="expLog">导出审计日志 (JSON)</button>
+    </div>
+    <pre class="log" id="logBox"></pre>
+  `;
+  renderReview(found);
+  renderLog();
+  $("#expAnno").onclick=exportAnnotation;
+  $("#expLog").onclick=exportLog;
+}
+
+function renderReview(found){
+  const box=$("#reviewBox");
+  box.innerHTML=`
+    <div class="stage"><div class="on"><b>阶段一</b>算法初筛 Auto</div><div class="on"><b>阶段二</b>设计师/专家复核 Review</div><div><b>阶段三</b>双语判定与标注 Annotate</div></div>
+    <p style="font-size:12px;color:var(--ink-soft);margin:0 0 8px">逐项确认或驳回算法初筛结果，可加注说明；确认项将进入双语标注记录。 Confirm or reject each auto finding; confirmed items enter the annotation record.</p>
+  `;
+  if(!found.length){box.insertAdjacentHTML("beforeend",`<p style="font-size:12.5px">无待复核项。 Nothing to review.</p>`);return;}
+  found.forEach((x,i)=>{
+    review[x.id]={decision:null,note:""};
+    const el=document.createElement("div");el.className="rev";
+    el.innerHTML=`<div class="h">${x.id} · ${x.type}（${x.sev}）</div>
+      <div class="acts">
+        <button data-act="confirm" data-id="${x.id}">确认 Confirm</button>
+        <button data-act="reject" data-id="${x.id}">驳回 Reject</button>
+      </div>
+      <textarea placeholder="专家批注（可选） Expert note…" data-id="${x.id}"></textarea>
+      <div class="state" id="st-${x.id}">未复核 Pending</div>`;
+    box.appendChild(el);
+  });
+  box.querySelectorAll(".acts button").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.id,act=b.dataset.act;
+    review[id].decision=act;
+    b.parentNode.querySelectorAll("button").forEach(x=>x.classList.remove("sel"));
+    b.classList.add("sel");
+    $("#st-"+id).textContent=(act==="confirm"?"已确认 Confirmed":"已驳回 Rejected");
+    addLog(`复核 ${id}：${act==="confirm"?"确认":"驳回"}`);renderLog();
+  });
+  box.querySelectorAll("textarea").forEach(t=>t.oninput=()=>{review[t.dataset.id].note=t.value;});
+}
+
+function exportAnnotation(){
+  const items=lastFindings.map(x=>({
+    rule:x.id,type:x.type,type_en:x.en,severity:x.sev,prompt_strength:x.strength,
+    explanation_zh:x.zh,explanation_en:x.en,basis:x.ref,
+    expert_decision:review[x.id]?.decision||"pending",expert_note:review[x.id]?.note||""
+  }));
+  const {score}=recognize(lastFeat);
+  const rec={
+    schema:"huafu-fidelity/annotation-v1",
+    generated_at:new Date().toISOString(),
+    target_type:label("type",lastFeat.type),
+    features:Object.fromEntries(Object.entries(lastFeat).map(([k,v])=>[k,label(k,v)])),
+    fidelity_score:score,
+    confirmed_count:items.filter(i=>i.expert_decision==="confirm").length,
+    findings:items,
+    note:"Prototype output. Recognition by transparent expert rule base, not a trained model."
+  };
+  download(rec,`huafu-annotation-${Date.now()}.json`);
+  addLog("导出双语判定标注");renderLog();
+}
+function exportLog(){download({schema:"huafu-fidelity/audit-log-v1",exported_at:new Date().toISOString(),entries:log},`huafu-auditlog-${Date.now()}.json`);}
+function download(obj,name){const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
+
+function addLog(msg){log.push({t:new Date().toISOString(),msg});}
+function renderLog(){const el=$("#logBox");if(!el)return;el.textContent=log.slice(-8).map(e=>`${e.t.slice(11,19)}  ${e.msg}`).join("\n")||"—";}
+
+$("#form").addEventListener("submit",e=>{e.preventDefault();run();});
+$("#reset").onclick=()=>{$("#form").reset();["type","collar","shape","waist","motif","craft","context","origin"].forEach(k=>$("#"+k).selectedIndex=0);};
+</script>
+</body>
+</html>
