@@ -10,10 +10,9 @@ abstract: >-
   and a three-stage human-AI review workflow.
 type: software
 authors:
-  - given-names: "<Your given name 名>"
-    family-names: "<Your family name 姓>"
-    # orcid: "https://orcid.org/0000-0000-0000-0000"   # 可选 optional
-    affiliation: "<Your institution 单位>"
+  - given-names: "小愉"
+    family-names: "孟"
+    affiliation: "宁波财经学院"
 keywords:
   - value sensitive design
   - cultural fidelity
@@ -25,4 +24,4 @@ keywords:
 license: MIT
 version: "0.1.0"
 date-released: "2026-06-20"
-url: "https://github.com/<your-username>/huafu-fidelity"
+url: "https://github.com/tonggx74-wq/huafu-fidelity"
