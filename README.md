@@ -1,5 +1,7 @@
 # 华服保真 · HuaFu-Fidelity
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20780674.svg)](https://doi.org/10.5281/zenodo.20780674)
+
 **面向国际传播的中华服饰视觉形象文化失真识别系统（可解释界面 · 研究雏形）**
 *An explainable-interface prototype for recognizing cultural distortion of Chinese costume (Hanfu, Qipao, ethnic dress) in generative-AI content for international communication.*
 
@@ -47,11 +49,12 @@ python3 -m http.server 8000
 # 然后访问 / then open  http://localhost:8000
 ```
 
-## 在线演示 / Live demo (GitHub Pages)
+## 在线演示 / Live demo
 
-仓库 **Settings → Pages → Build and deployment → Source: Deploy from a branch → main / (root) → Save**。
-几分钟后即可通过 `https://<your-username>.github.io/<repo-name>/` 访问。
-Enable Pages in the repo settings; the live demo will be served from your `main` branch root.
+**▶ https://tonggx74-wq.github.io/huafu-fidelity/**
+
+打开后，从左侧选择预设案例，或自定义服饰特征后点击“运行识别”。
+Open the link, then pick a preset case on the left, or set features and click Run.
 
 ## 扩充知识库 / Extending the rule base
 
@@ -70,18 +73,13 @@ Contributions (rules, corrections, references) via Pull Request are welcome.
 
 ## 引用 / Citation
 
-引用信息见 [`CITATION.cff`](./CITATION.cff)。通过 Zenodo 归档后可获得 DOI（见下）。
-See `CITATION.cff`. A DOI can be obtained by archiving a release on Zenodo (see below).
+本软件已在 Zenodo 永久存档，引用请用以下格式：
+This software is archived on Zenodo. Please cite it as:
 
-## 取得 DOI / Get a DOI (via Zenodo)
+> 孟小愉. (2026). *HuaFu-Fidelity 华服保真：面向国际传播的中华服饰视觉形象文化失真识别系统（可解释界面雏形）* (Version 0.1.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.20780674
 
-1. 用 GitHub 账号登录 **https://zenodo.org** → 右上角菜单 **GitHub**。
-2. 在仓库列表中，把目标仓库的开关 **拨到 ON**（授权 Zenodo 监听该仓库）。
-3. 回到 GitHub，本仓库 **Releases → Draft a new release**，填一个标签（如 `v0.1.0`）并 **Publish release**。
-4. Zenodo 会自动归档该 Release 并**铸造一个 DOI**；在 Zenodo 的 *Upload* 页面即可看到 DOI 与徽章。
-5. 把徽章加到 README，例如：`[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)`
-
-> 注：必须先 **创建一个 Release**，Zenodo 才会生成 DOI；之后每个新 Release 会得到新版本 DOI，并自动归入一个恒定的 “concept DOI”。
+机器可读的引用信息见 [`CITATION.cff`](./CITATION.cff)。
+Machine-readable citation metadata is in [`CITATION.cff`](./CITATION.cff).
 
 ## 学术依据 / Scholarly basis
 
